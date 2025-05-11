@@ -1,9 +1,11 @@
+#[allow(unused)]
 struct Ticket {
     title: String,
     description: String,
     status: String,
 }
 
+#[allow(unused)]
 impl Ticket {
     // TODO: implement the `new` function.
     //  The following requirements should be met:
@@ -18,11 +20,28 @@ impl Ticket {
     // as well as some `String` methods. Use the documentation of Rust's standard library
     // to find the most appropriate options -> https://doc.rust-lang.org/std/string/struct.String.html
     fn new(title: String, description: String, status: String) -> Self {
-        todo!();
-        Self {
+        if title.len() == 0 {
+            panic!("Title cannot be empty");
+        }
+        if description.len() == 0 {
+            panic!("Description cannot be empty");
+        }
+        if title.len() > 50 {
+            panic!("Title cannot be longer than 50 bytes")
+        }
+        if description.len() > 500 {
+            panic!("Description cannot be longer than 500 bytes")
+        }
+        let instance = Self {
             title,
             description,
-            status,
+            status: status.clone(),
+        };
+        match status.as_str() {
+            "To-Do" => instance,
+            "In Progress" => instance,
+            "Done" => instance,
+            _ => panic!("Only `To-Do`, `In Progress`, and `Done` statuses are allowed")
         }
     }
 }
