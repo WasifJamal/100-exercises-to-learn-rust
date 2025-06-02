@@ -5,18 +5,20 @@ use tokio::net::TcpListener;
 //  The received data should be echoed back to the client.
 pub async fn echoes(first: TcpListener, second: TcpListener) -> Result<(), anyhow::Error> {
     loop {
-        let (mut socket1, _) = first.accept().await?;
-        let (mut socket2, _) = second.accept().await?;
-        let handle1 = tokio::spawn(async move {
-            let (mut reader, mut writer) = socket1.split();
-            let _ = tokio::io::copy(&mut reader, &mut writer).await;
-        });
-        let handle2 = tokio::spawn(async move {
-            let (mut reader, mut writer) = socket2.split();
-            let _ = tokio::io::copy(&mut reader, &mut writer).await;
-        });
-        handle1.await?;
-        handle2.await?;
+        tokio::select! {
+            Ok((mut socket, _)) = first.accept() => {
+                tokio::spawn(async move {
+                    let (mut reader, mut writer) = socket.split();
+                    let _ = tokio::io::copy(&mut reader, &mut writer).await;
+                }).await?;
+            }
+            Ok((mut socket, _)) = second.accept() => {
+                tokio::spawn(async move {
+                    let (mut reader, mut writer) = socket.split();
+                    let _ = tokio::io::copy(&mut reader, &mut writer).await;
+                }).await?;
+            }
+        }
     }
 }
 
